@@ -1,0 +1,324 @@
+ul#catalogItemList {
+    display: block;
+    list-style: none;
+    width: 745px;
+    margin: 15px auto 0;
+    min-height: 200px;
+    overflow: hidden;
+}
+
+ul#catalogItemList.noFixedWidth { /*NEED CORRECTION  - MESS INSIDE*/
+    width: 445px;
+    overflow: hidden;
+}
+
+ul#catalogItemList li {
+	float:left;
+    margin: 5px 10px;
+}
+
+ul#catalogItemList li p {
+    /*border-left: 2px solid #444444;*/
+    text-align: left;
+    font-size: 18px;
+    padding-left: 5px;
+    margin: 4px 0;
+}
+
+ul#catalogItemList li span {
+    display: block;
+    text-align: left;
+    color: #DE5328;
+    padding-left: 3px;
+    font-size: 9px;
+    padding-bottom: 2px;
+}
+
+ul#catalogItemList li div.categoryTitle {
+    border-left: 2px solid #444444;
+    cursor: pointer;
+    margin-bottom: 5px;
+    -webkit-box-shadow: 1px 0px 10px rgba(0,0, 0, 0.5);
+    -moz-box-shadow: 1px 0px 10px rgba(0,0, 0, 0.5);
+    box-shadow: 1px 0px 10px rgba(0,0, 0, 0.5);
+    margin-bottom: 5px;
+}
+
+ul#catalogItemList li a {
+    text-decoration: none;
+}
+
+ul#catalogItemList li div.itemImage {
+    height: 250px;
+    width: 125px;
+    background-repeat: no-repeat;
+    -webkit-box-shadow: 0px 2px 5px rgba(0,0, 0, 1.0);
+    -moz-box-shadow: 0px 2px 5px rgba(0,0, 0, 1.0);
+    box-shadow: 0px 2px 5px rgba(0,0, 0, 1.0);
+}
+
+div#catalogControlPanel {
+    width: 850px;
+    margin: 10px auto;
+}
+
+div#catalogControlPanel select#catalogCategories {
+    width: 120px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+ul#colorsMatch, .artSamples {
+    margin: 0 auto;
+    overflow: hidden;
+    height: 90px;
+}
+
+.artSamples {
+    height: 130px;
+}
+
+ul#colorsMatch li, .artSamples li {
+    display: inline-block;
+    overflow: hidden;
+	width:60px;
+}
+
+.artSamples li {
+    width: 77px;
+}
+
+ul#colorsMatch li img.colorPattern {
+    width: 50px;
+    height: 70px;
+    border: 1px solid black;
+    margin: 9px 5px;
+    cursor: pointer;
+    /*border: 2px solid #444444;*/
+    -webkit-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+    -moz-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+    box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+}
+
+.artSamples li img.pictureArt {
+      width: 60px;
+      height: 110px;
+      border: 1px solid black;
+      margin: 9px 5px;
+      cursor: pointer;
+      /*border: 2px solid #444444;*/
+      -webkit-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+      -moz-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+      box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+  }
+
+.activePattern {
+    width: 50px;
+    height: 70px;
+    margin: 7px 5px;
+    cursor: pointer;
+    border: 3px solid #DE5328;
+    -webkit-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+    -moz-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+    box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+    /*-webkit-box-shadow: 2px 5px 15px rgba(222, 84, 40, 0.9);
+    -moz-box-shadow: 2px 5px 15px rgba(222, 84, 40, 0.9);
+    box-shadow: 2px 5px 15px rgba(222, 84, 40, 0.9);*/
+}
+
+ul#dialogPattern {
+    margin: 0 auto;
+    overflow: hidden;
+    height: 90px;
+}
+
+ul#dialogPattern li {
+    display: inline-block;
+    overflow: hidden;
+}
+
+ul#dialogPattern li img.colorPattern {
+    width: 50px;
+    height: 70px;
+    border: 1px solid black;
+    margin: 9px 5px;
+    cursor: pointer;
+    -webkit-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+    -moz-box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+    box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+}
+
+img.modelPicture {
+    /*cursor: pointer;*/
+}
+
+img.likedModelPicture {
+    cursor: pointer;
+}
+
+ul#catalogItemList li div.modelTitle, div#catalogDialogBox div.modelTitle {
+    border-left: 2px solid #444444;
+    cursor: default;
+    margin-bottom: 5px;
+    -webkit-box-shadow: 1px 0px 10px rgba(0,0, 0, 0.5);
+    -moz-box-shadow: 1px 0px 10px rgba(0,0, 0, 0.5);
+    box-shadow: 1px 0px 10px rgba(0,0, 0, 0.5);
+    margin-bottom: 5px;
+}
+
+div#catalogControlPanel div.currentPatternName, div#catalogDialogBox div.currentPatternName{
+    margin: 5px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+ul#catalogItemList div.likedModel {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 1px 0 10px rgba(0, 0, 0, 0.5);
+    color: #666666;
+    padding: 2px 0;
+    border-bottom: 1px solid black;
+}
+
+ul#catalogItemList div.likedModelActive {
+    color: #DE5328;
+    font-weight: bold;
+}
+
+div.haveLikedModels {
+    display: none;
+    width: 745px;
+    margin: 0 auto;
+}
+
+div.backToCatalog {
+    width: 745px;
+    margin: 0 auto;
+}
+
+div.haveLikedModels > a, div.backToCatalog > a {
+    color: #DE5328;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 2px 15px;
+}
+
+ul#catalogItemList li span.dislike {
+    position: absolute;
+    cursor: pointer;
+}
+
+ul#catalogItemList .boxgrid {
+    width: 125px;  
+    height: 225px;  
+    margin:10px;  
+    background:transparent;  
+    border: none;  
+    overflow: hidden;  
+    position: relative;  
+}
+
+ul#catalogItemList .boxcaption {  
+    top: 250px;  
+    left: 0;
+}
+
+ul#catalogItemList .boxcaptionZoom {
+    top: -51px;
+}
+
+ul#catalogItemList .boxcaption {
+    float: left;  
+    position: absolute;  
+    background-color:#E4E4E4;
+    height: 50px;  
+    width: 125px;
+    opacity: .7;  
+    /* For IE 5-7 */  
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);  
+    /* For IE 8 */  
+    -MS-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";  
+    border-top: 1px solid black;
+}
+
+ul#catalogItemList .boxcaptionZoom {
+    float: left;  
+    position: absolute;
+    background-color:#E4E4E4;
+    height: 50px;  
+    width: 125px;  
+    opacity: .7;  
+    /* For IE 5-7 */  
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);  
+    /* For IE 8 */  
+    -MS-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";  
+    /*border-bottom: 1px solid black;*/
+}
+
+ul#catalogItemList span.zoomModel, ul#catalogItemList span.roomModel {
+    vertical-align: middle;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+    display: table-cell;
+    text-align: center;
+    height: 50px;
+    width: 125px;
+    cursor: pointer;
+}
+
+ul#catalogItemList span.zoomModel:hover, ul#catalogItemList span.roomModel:hover {
+    color: #DE5328;
+}
+
+ul#catalogItemList span.sample {
+    font-size: 11px;
+    display: inline-block;
+    line-height: 1em;
+}
+
+ul#catalogItemList span.newModel {
+    font-size: 11px;
+    display: inline-block;
+    float: right;
+    padding-right: 10px;
+}
+
+ul#catalogItemList span.newModelMarker {
+    position: absolute;
+    /*transition:All 1s ease-in;
+    -webkit-transition:All 1s ease-in;
+    -moz-transition:All 1s ease-in;
+    -o-transition:All 1s ease-in;*/
+    transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
+    -webkit-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
+    -moz-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-5px, 0px); /*-13px, -4px*/
+    -o-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
+    -ms-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
+    border: solid 1px #2d2d2d;
+    text-align: center;
+    background: #E4E4E4;
+    padding: 10px 60px;
+    font-weight: bold;
+    font-size: 22px;
+    color: #DE5328;
+    width: 90px;
+    top: 0px;
+    left: 0px;
+    /*-moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;*/
+}
+
+/*.newModelMarker:hover{
+    transform: rotate(0deg) scale(0.67) skew(1deg) translate(0px);
+    -webkit-transform: rotate(0deg) scale(0.67) skew(1deg) translate(0px);
+    -moz-transform: rotate(0deg) scale(0.67) skew(1deg) translate(0px);
+    -o-transform: rotate(0deg) scale(0.67) skew(1deg) translate(0px);
+    -ms-transform: rotate(0deg) scale(0.67) skew(1deg) translate(0px);
+}*/
