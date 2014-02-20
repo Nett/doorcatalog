@@ -1,4 +1,4 @@
-ul#catalogItemList {
+ul#catalogItemList, ul#catalogItemListMenu {
     display: block;
     list-style: none;
     width: 745px;
@@ -7,17 +7,17 @@ ul#catalogItemList {
     overflow: hidden;
 }
 
-ul#catalogItemList.noFixedWidth { /*NEED CORRECTION  - MESS INSIDE*/
+ul#catalogItemList.noFixedWidth, ul#catalogItemListMenu.noFixedWidth { /*NEED CORRECTION  - MESS INSIDE*/
     width: 445px;
     overflow: hidden;
 }
 
-ul#catalogItemList li {
+ul#catalogItemList li, ul#catalogItemListMenu li {
 	float:left;
     margin: 5px 10px;
 }
 
-ul#catalogItemList li p {
+ul#catalogItemList li p, ul#catalogItemListMenu li p {
     /*border-left: 2px solid #444444;*/
     text-align: left;
     font-size: 18px;
@@ -25,7 +25,7 @@ ul#catalogItemList li p {
     margin: 4px 0;
 }
 
-ul#catalogItemList li span {
+ul#catalogItemList li span, ul#catalogItemListMenu li span {
     display: block;
     text-align: left;
     color: #DE5328;
@@ -34,7 +34,7 @@ ul#catalogItemList li span {
     padding-bottom: 2px;
 }
 
-ul#catalogItemList li div.categoryTitle {
+ul#catalogItemList li div.categoryTitle, ul#catalogItemListMenu li div.categoryTitle {
     border-left: 2px solid #444444;
     cursor: pointer;
     margin-bottom: 5px;
@@ -44,13 +44,14 @@ ul#catalogItemList li div.categoryTitle {
     margin-bottom: 5px;
 }
 
-ul#catalogItemList li a {
+ul#catalogItemList li a, ul#catalogItemListMenu li a {
     text-decoration: none;
 }
 
 ul#catalogItemList li div.itemImage {
     height: 250px;
     width: 125px;
+    position: relative;
     background-repeat: no-repeat;
     -webkit-box-shadow: 0px 2px 5px rgba(0,0, 0, 1.0);
     -moz-box-shadow: 0px 2px 5px rgba(0,0, 0, 1.0);
@@ -166,7 +167,7 @@ ul#catalogItemList li div.modelTitle, div#catalogDialogBox div.modelTitle {
     margin-bottom: 5px;
 }
 
-div#catalogControlPanel div.currentPatternName, div#catalogDialogBox div.currentPatternName{
+div#catalogControlPanel div.currentPatternName, div#catalogDialogBox div.currentPatternName {
     margin: 5px;
     text-align: center;
     font-size: 11px;
@@ -276,7 +277,7 @@ ul#catalogItemList span.zoomModel:hover, ul#catalogItemList span.roomModel:hover
     color: #DE5328;
 }
 
-ul#catalogItemList span.sample {
+ul#catalogItemList span.sample, ul#catalogItemListMenu span.sample {
     font-size: 11px;
     display: inline-block;
     line-height: 1em;
@@ -310,6 +311,7 @@ ul#catalogItemList span.newModelMarker {
     width: 90px;
     top: 0px;
     left: 0px;
+    z-index: 30;
     /*-moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;*/

@@ -32,6 +32,8 @@ const SELECT_MODE_CONDITION = 'condition';
 const SELECT_CATEGORY_COLORS = 'colors';
 const SELECT_CATEGORY_IMAGE = 'image';
 const SELECT_CATEGORY_ID = 'category';
+const SELECT_NEW_MARKER_FOLDER_ORIENTED = 'folderNewMarker';
+const SELECT_MODE_CONDITION_GET_ROW = 'conditionRow';
 
 const NEW_MARKER_TITLE = 'title';
 const NEW_MARKER_IMG = 'img';
@@ -248,6 +250,9 @@ function addCatalogItem() {
         $requestedData = $_POST;
         unset ($requestedData['action']);
         $deleted = deleteDoorModel($requestedData['category'], $requestedData['name']);
+        if(!isset($requestedData['colorAndImage'])) {
+            $requestedData['colorAndImage'][] = array('color' => 0, 'image' => null);
+        }
         foreach ($requestedData['colorAndImage'] as $key => $items) {
             try{
             $wpdb->insert($table_name,
@@ -447,6 +452,13 @@ function selectCatalogItems($selectMode, $orderBy = array(), $condition = null, 
                         FROM $table_name $where 
                         ORDER BY $orderBy";
             break;
+
+            case SELECT_MODE_CONDITION_GET_ROW:
+                $query = "SELECT id, category_id, name, description, image, color, new
+                        FROM $table_name $where
+                        ORDER BY $orderBy";
+                return $wpdb->get_row($query, ARRAY_A);
+                break;
         
             case SELECT_CATEGORY_COLORS:
                 $query = "SELECT DISTINCT color, new
@@ -461,10 +473,15 @@ function selectCatalogItems($selectMode, $orderBy = array(), $condition = null, 
             case SELECT_CATEGORY_ID:
                 $query = "SELECT category_id 
                         FROM $table_name $where GROUP BY ".$groupBy['C']."";
+                return $wpdb->get_col($query);
             break;
+            case SELECT_NEW_MARKER_FOLDER_ORIENTED:
+                $query = "SELECT `name` FROM $table_name where $condition";
+                return $wpdb->get_col($query);
+                break;
         }
         
-        $entries = $wpdb->get_results($query , ARRAY_A);
+        $entries = $wpdb->get_results($query, ARRAY_A);
         return $entries;
     }
 }
@@ -495,7 +512,7 @@ function room() { ?>
             <div id="floor" style="display: block; position: absolute; width: 650px; height: 100px; border: none; line-height: 100px; font-family: arial, sans-serif; font-size: 60px; color: white; text-align: center; background: url(<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__));?>/images/sample/floor/2.jpg); -moz-transform: rotateX(-90deg) translateZ( 275px ); box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7); 
                     -webkit-transform: rotateX(-90deg) translateZ( 275px );" class="bottom">
             </div>
-            <div id="roomImgHolder" style="-moz-transform: translate(280px, 60px); -webkit-transform: translate(280px, 55px); background-color: transparent;  height: 224px; overflow: hidden; position: relative; width: 104px;"> 
+            <div id="roomImgHolder" style="-moz-transform: translate(280px, 60px); -webkit-transform: translate(280px, 55px); background-color: transparent;  height: 224px; overflow: hidden; position: relative; width: 104px;">
                 <img class="currentViewImg modelPicture" src="#" height="250px" width="125px" alt="" style="left: -11px; position: absolute; top: -19px;" />
             </div>
         </div>
@@ -560,12 +577,44 @@ function doorCatalog($catalogPage, $catalogFlag = false, $newMarkerPlace) {
     <?php
         $likeQuery = explode('-', $_GET['likeQuery']);
         foreach ($likeQuery as $query) {
+            $modelItem = array();
             $components = explode('_', $query);
-            $condition = 'category_id = '.$components[0].' AND name = '.$components[1].' AND color = '.$components[2];
-            $selectedItems[] = selectCatalogItems(SELECT_MODE_CONDITION, array(), $condition, true);
+            if(($components['0'] === '6') || $components['0'] === '7') {
+                $patternPath = '';
+                $pictureDirectory = 'art';
+                if($components['0'] === '7') {
+                    $pictureDirectory = 'glass';
+                }
+                $picturePath = $components['0'].'-'.$components['1'];
+                if(isset($components['3'])) {
+                    $patternPath .= 'border'.DIRECTORY_SEPARATOR;
+                }
+                $patternFolder = '6'; // !!! IMPORTANT category is 6 for Art
+                $patternPath .= $patternFolder.'-'.$components['2'];
+                $patternImage = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'patterns'.DIRECTORY_SEPARATOR.'art'.DIRECTORY_SEPARATOR . $patternPath . '.{jpg,png,gif}', GLOB_BRACE);
+                $pictureImage = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'doors'.DIRECTORY_SEPARATOR.'original'.DIRECTORY_SEPARATOR. $pictureDirectory .DIRECTORY_SEPARATOR . $picturePath . '*.{jpg,png,gif}', GLOB_BRACE);
+                if(!empty($patternImage) && !empty($pictureImage) ) {
+                    $modelItem['category_id'] = $components['0'];
+                    $modelItem['name'] = $components['1'];
+                    $modelItem['color'] = $components['2'];
+                    if(isset($components['3'])) {
+                        $modelItem['artB'] = true;
+                        $patternImageUrl = get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/patterns/art/border/' . pathinfo(array_shift($patternImage), PATHINFO_BASENAME);
+                    }else {
+                        $patternImageUrl = get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/patterns/art/' . pathinfo(array_shift($patternImage), PATHINFO_BASENAME);
+                    }
+                    $modelItem['image'] = $patternImageUrl;
+                    $modelItem['picture'] = get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/original/'.$pictureDirectory.'/' . pathinfo(array_shift($pictureImage), PATHINFO_BASENAME);
+                    $selectedItems[] = $modelItem;
+                    unset($modelItem);
+                }
+            }
+            else {
+                $condition = 'category_id = '.$components[0].' AND name = '.$components[1].' AND color = '.$components[2];
+                $selectedItems[] = selectCatalogItems(SELECT_MODE_CONDITION_GET_ROW, array(), $condition, true);
+            }
         }
-        foreach ($selectedItems as $item) {
-            foreach ($item as $model){?>
+        foreach ($selectedItems as $model) { ?>
                 <li>
                  <div class="modelTitle">
                     <p>
@@ -575,21 +624,69 @@ function doorCatalog($catalogPage, $catalogFlag = false, $newMarkerPlace) {
                      </p>
                  </div>
                  <div class="itemImage">
-                    <span class="dislike ui-icon ui-icon-closethick" title="Убрать" data-likeurl="<?php echo get_option('siteurl').'/'.$catalogPage.'?likeQuery=';?>" data-querykey="<?php echo $model['category_id'].$model['name'].$model['color'];?>"></span>
-                    <img class="likedModelPicture" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/small/'.$model['image'] ?>" height="250px" width="125px" alt="" />
+                    <span class="dislike ui-icon ui-icon-closethick" style="z-index: 22;" title="Убрать" data-likeurl="<?php echo get_option('siteurl').'/'.$catalogPage.'?likeQuery=';?>" data-querykey="<?php echo $model['category_id'].$model['name'].$model['color'];?>"></span>
+                     <?php if($model['category_id'] !== '6' && $model['category_id'] !== '7') { ?>
+                        <img class="likedModelPicture" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/small/'.$model['image'] ?>" height="250px" width="125px" alt="" />
+                    <?php }else { ?>
+                         <?php
+                             $imageTop = 'top: 29px;';
+                             $imageLeft = 'left: 20px;';
+                             $imageWidth = 'width: 85px;';
+                             $imageHeight = 'height: 212px;';
+                            if(isset($model['artB'])) {
+                                $imageTop = 'top: 41px;';
+                                $imageLeft = 'left: 32px;';
+                                $imageWidth = 'width: 62px;';
+                                $imageHeight = 'height: 183px;';
+                            }
+                         $handleFileName = 'handle';
+                         $handleLeftPosition = 'left: 25px;';
+                         if($model['category_id'] === '7') {
+                             $handleFileName = 'handleG';
+                             $handleLeftPosition = 'left: 21px;';
+                         }
+                         ?>
+                         <img class="likedModelPicture" style="position: relative; z-index: 20;" data-pluginurl="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__));?>" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo $model['image'] ?>" height="250px" width="125px" alt="" />
+                         <img class="likedModelImage" style="position: absolute; <?php echo $imageHeight.' '.$imageWidth.' '.$imageTop.' '.$imageLeft;?> z-index: 10;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo $model['picture'] ?>" alt="" />
+                         <img class="modelPictureHandle" style="position: absolute; top: 132px; <?php echo $handleLeftPosition;?> width: 16px; height: 6px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/'.$handleFileName.'.png'; ?>" alt="" />
+                         <?php if($model['category_id'] === '7') { ?>
+                             <img class="modelPictureHinge" style="position: absolute; top: 52px; left: 96px; width: 14px; height: 10px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/hinge.png'; ?>" alt="" />
+                             <img class="modelPictureHinge" style="position: absolute; top: 198px; left: 96px; width: 14px; height: 10px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/hinge.png'; ?>" alt="" />
+                         <?php } ?>
+                    <?php } ?>
                  </div>
              </li>
-                
-                
-            <?php }
-        }
+        <?php }
         die();
         ?>
     </ul>
     <?php
     }
     else if( is_front_page() || !$catalogFlag ) { // Main mode - displays all existing categories
-         $models = selectCatalogItems(SELECT_MODE_RANDOM, array(), null, true);
+        //$models = selectCatalogItems(SELECT_MODE_RANDOM, array(), null, true);
+        $models = array_filter(selectCatalogItems(SELECT_MODE_RANDOM, array(), null, true), function($item){
+            if($item['category_id'] !== '6' && $item['category_id'] !== '7') {
+                return true;
+            }
+        });
+        if(in_array('6', $categories)) {
+            $folderModels = getFolderModels();
+            if(!empty($folderModels['models'])) {
+                $folderModel = $folderModels['models'][array_rand($folderModels['models'])];
+                $folderModel['color'] = $folderModels['color'];
+                $folderModel['modelQty'] = $folderModels['modelQty'];
+                $models[] = $folderModel;
+            }
+        }
+        if(in_array('7', $categories)) {
+            $folderModels = getFolderModels('7');
+            if(!empty($folderModels['models'])) {
+                $folderModel = $folderModels['models'][array_rand($folderModels['models'])];
+                $folderModel['color'] = $folderModels['color'];
+                $folderModel['modelQty'] = $folderModels['modelQty'];
+                $models[] = $folderModel;
+            }
+        }
          ?>
     <div class="haveLikedModels" data-likeurl="<?php echo get_option('siteurl').'/'.$catalogPage.'?likeQuery=';?>"><a class="likeLink" href="#">Понравившиеся модели</a></div>
     <ul id="catalogItemList" <?php if(!$catalogFlag){ ?>class="noFixedWidth"<?php }?>>
@@ -615,8 +712,33 @@ function doorCatalog($catalogPage, $catalogFlag = false, $newMarkerPlace) {
                      </a>
                     <div class="itemImage" style="overflow: hidden; position: relative;">
                         <a href="<?php echo get_option('siteurl') . '/' . $catalogPage . '?category=' . $model['category_id'] . '';?>" title="">
-                            <?php echo ((integer)$model['new'] === 1) ? '<span class="newModelMarker">' . $config['phrases']['new'] . '</span>' : ''; ?>
-                            <img class="modelPictureCategoryViewer" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/small/'.$model['image'] ?>" height="250px" width="125px" alt="" />
+                            <?php echo (isset($model['new']) && (integer)$model['new'] === 1) ? '<span class="newModelMarker">' . $config['phrases']['new'] . '</span>' : '';
+                                if($model['category_id'] === '6' || $model['category_id'] === '7') {
+                                    $imageTop = 'top: 29px;';
+                                    $imageLeft = 'left: 20px;';
+                                    $imageWidth = 'width: 85px;';
+                                    $imageHeight = 'height: 212px;';
+                                    /* !!! IMPORTANT !!! */
+                                    $modelCategoryId = '6'; //Used category #6 because Art category is master of templates
+                                    $patternImage = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'patterns'.DIRECTORY_SEPARATOR.'art'.DIRECTORY_SEPARATOR . $modelCategoryId . '-' . $model['color'] . '.{jpg,png,gif}', GLOB_BRACE);
+                                    $patternImageUrl = get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/patterns/art/' . pathinfo(array_shift($patternImage), PATHINFO_BASENAME);
+                                    $handleFileName = 'handle';
+                                    $handleLeftPosition = 'left: 25px;';
+                                    if($model['category_id'] === '7') {
+                                        $handleFileName = 'handleG';
+                                        $handleLeftPosition = 'left: 21px;';
+                                    }
+                            ?>
+                                    <img class="modelPictureCategoryViewer" style="z-index: 20; position: absolute;" src="<?php echo $patternImageUrl; ?>" height="250px" width="125px" alt="" />
+                                    <img class="likedModelImage" style="position: absolute; <?php echo $imageHeight.' '.$imageWidth.' '.$imageTop.' '.$imageLeft;?> z-index: 10;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/original/'.$model['image']; ?>" alt="" />
+                                    <img class="modelPictureHandle" style="position: absolute; top: 132px; <?php echo $handleLeftPosition;?> width: 16px; height: 6px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/' . $handleFileName . '.png'; ?>" alt="" />
+                                    <?php if($model['category_id'] === '7') { ?>
+                                        <img class="modelPictureHinge" style="position: absolute; top: 52px; left: 96px; width: 14px; height: 10px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/hinge.png'; ?>" alt="" />
+                                        <img class="modelPictureHinge" style="position: absolute; top: 198px; left: 96px; width: 14px; height: 10px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/hinge.png'; ?>" alt="" />
+                                    <?php } ?>
+                            <?php }else { ?>
+                                    <img class="modelPictureCategoryViewer" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/small/'.$model['image'] ?>" height="250px" width="125px" alt="" />
+                            <?php } ?>
                         </a>
                     </div>
                 </li>
@@ -643,43 +765,149 @@ function doorCatalog($catalogPage, $catalogFlag = false, $newMarkerPlace) {
             $categoryId = $_GET['category'];
         }
         else {
-            $categoryId = $categoryIds[array_rand($categoryIds)]['category_id'];
+            $categoryId = $categoryIds[array_rand($categoryIds)];
         }
         $condition .= $categoryId;
         $condition .= ' AND color = ';
        
         $colorNum = null;
-        
-        $colorCondition = 'category_id = ' . $categoryId;
-        if(isset($_GET['color'])) {$colorCondition .= ' AND color = ' . $_GET['color'];}
-        $colors = selectCatalogItems(SELECT_CATEGORY_COLORS, array(), $colorCondition, true);
-        if(!empty($colors) && isset($_GET['color'])) {
+
+        if(($categoryId !== '6') && ($categoryId !== '7')) {
             $colorCondition = 'category_id = ' . $categoryId;
+            if(isset($_GET['color'])) {$colorCondition .= ' AND color = ' . $_GET['color'];}
             $colors = selectCatalogItems(SELECT_CATEGORY_COLORS, array(), $colorCondition, true);
-            $condition .=  $_GET['color'];
-            $colorNum = $_GET['color'];
+            if(!empty($colors) && isset($_GET['color'])) {
+                $colorCondition = 'category_id = ' . $categoryId;
+                $colors = selectCatalogItems(SELECT_CATEGORY_COLORS, array(), $colorCondition, true);
+                $condition .=  $_GET['color'];
+                $colorNum = $_GET['color'];
+            }
+            else {
+                $colorCondition = 'category_id = ' . $categoryId;
+                $colors = selectCatalogItems(SELECT_CATEGORY_COLORS, array(), $colorCondition, true);
+                $colorNum = $colors[array_rand($colors)]['color'];
+                $condition .= $colorNum;
+            }
+            $selectedItems = selectCatalogItems(SELECT_MODE_CONDITION, array(), $condition, true);
         }
         else {
-            $colorCondition = 'category_id = ' . $categoryId;
-            $colors = selectCatalogItems(SELECT_CATEGORY_COLORS, array(), $colorCondition, true);
-            $colorNum = $colors[array_rand($colors)]['color'];
-            $condition .= $colorNum;
+            $directoryName = 'art';
+            if($categoryId === '7') {
+                $directoryName = 'glass';
+            }
+            $colorFolderExists = array();
+            $colorsDir = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'patterns'.DIRECTORY_SEPARATOR.'art'.DIRECTORY_SEPARATOR.'*.{jpg,png,gif}', GLOB_BRACE);
+            foreach($colorsDir as $color) {
+                $info = pathinfo($color);
+                $colorParts = explode('-', $info['filename']);
+                $colors[]['color'] = $colorParts['1'];
+                $colorFolderExists[] = $colorParts['1'];
+            }
+            if(isset($_GET['color']) && in_array($_GET['color'], $colorFolderExists)) {
+                $colorNum = $_GET['color'];
+            }
+            else {
+                $colorNum = $colors[array_rand($colors)]['color'];
+            }
+            $modelsDir = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'doors'.DIRECTORY_SEPARATOR.'original'.DIRECTORY_SEPARATOR. $directoryName .DIRECTORY_SEPARATOR.'*.{jpg,png,gif}', GLOB_BRACE);
+            $searchCondition = '`category_id` = 6 AND `new` = 1';
+            if($categoryId === '7') {
+                $searchCondition = '`category_id` = 7 AND `new` = 1';
+            }
+            $dataBaseModels = selectCatalogItems(SELECT_NEW_MARKER_FOLDER_ORIENTED, array(), $searchCondition, true);
+            foreach($modelsDir as $k => $model) {
+                $info = pathinfo($model);
+                $modelParts = explode('-', $info['filename']);
+                $selectedItems[$k] = array('category_id' => $modelParts['0'], 'image' => $directoryName.'/'.$info['basename'], 'name' => $modelParts['1']);
+                if(!empty($dataBaseModels) && in_array($modelParts['1'], $dataBaseModels)) {
+                    $selectedItems[$k]['new'] = 1;
+                }
+            }
         }
-        $selectedItems = selectCatalogItems(SELECT_MODE_CONDITION, array(), $condition, true);
         ?>
         <div id="catalogControlPanel">
             <span class="modelDescription" style="display: none;"><?php echo $config['phrases']['modeldesc-'.$categoryId];?></span>
             <div style="text-align: center">
-            <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">Выберите серию дверей:</span>
-            <select id="catalogCategories">
+
+        <?php
+            $models = array_filter(selectCatalogItems(SELECT_MODE_RANDOM, array(), null, true), function($item){
+                if($item['category_id'] !== '6' && $item['category_id'] !== '7') {
+                    return true;
+                }
+            });
+        if(in_array('6', $categories)) {
+            $folderModels = getFolderModels();
+            if(!empty($folderModels['models'])) {
+                $folderModel = $folderModels['models'][array_rand($folderModels['models'])];
+                $folderModel['color'] = $folderModels['color'];
+                $folderModel['modelQty'] = $folderModels['modelQty'];
+                $models[] = $folderModel;
+            }
+        }
+        if(in_array('7', $categories)) {
+            $folderModels = getFolderModels('7');
+            if(!empty($folderModels['models'])) {
+                $folderModel = $folderModels['models'][array_rand($folderModels['models'])];
+                $folderModel['color'] = $folderModels['color'];
+                $folderModel['modelQty'] = $folderModels['modelQty'];
+                $models[] = $folderModel;
+            }
+        }
+     /* Menu instead of select element */   ?>
+    <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">Выберите серию дверей:</span>
+    <ul id="catalogItemListMenu" style="width: 600px; min-height: 115px; margin-top: 0px;">
+        <?php
+        if(!empty ($models)) {
+            foreach ($models as $k => $model) {
+                ?>
+                <li style="height: 50px;"
+                    data-categoryid="<?php echo $model['category_id'];?>"
+                    <?php if($model['category_id'] == $categoryId) {echo 'class="activeMenuCategory"';}?>
+                    >
+                    <a href="#" <?php //echo get_option('siteurl') . '/' . $catalogPage . '?category=' . $model['category_id'];?>
+                       class="catalogItemListMenuLink"
+                       title=""
+                       data-categoryurl="<?php echo get_option('siteurl').'/'.$catalogPage.'?category='.$model['category_id'];?>">
+                        <div class="categoryTitle" style="width: 125px; <?php if($model['category_id'] == $categoryId) {echo 'border-bottom: 3px solid #DE5328;';}?>">
+                            <p><span class="sample">Серия</span>
+                                <?php $model['name'];
+                                echo preg_replace('/^\s*(\S)/eu',"mb_strtoupper('\\1', 'UTF-8')", array_search($model['category_id'], $categories));
+                                ?>
+                            </p>
+                             <span>
+                                 Моделей в серии:
+                                 <?php
+                                 echo $model['modelQty'];
+                                 ?>
+                             </span>
+                        </div>
+                    </a>
+                </li>
+            <?php }
+        } ?>
+    </ul>
+
+            <!-- <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">Выберите серию дверей:</span> -->
+            <!-- <select id="catalogCategories">
             <?php
+                if(!in_array('6', $categoryIds) && in_array('6', $categories) ) {
+                    $categoryIds[] = '6';
+                }
+                if(!in_array('7', $categoryIds) && in_array('7', $categories)) {
+                    $categoryIds[] = '7';
+                }
                 foreach ($categoryIds as $categorySearchId) {
              ?>
-                <option value="<?php echo $categorySearchId['category_id'];?>" <?php if($categorySearchId['category_id'] == $categoryId) {echo ' selected="selected" ';}?> data-categoryurl="<?php echo get_option('siteurl').'/'.$catalogPage.'?category='.$categorySearchId['category_id']?>" ><?php echo preg_replace('/^\s*(\S)/eu',"mb_strtoupper('\\1', 'UTF-8')", array_search($categorySearchId['category_id'], $categories) );?></option>
+                <option value="<?php echo $categorySearchId;?>"
+                    <?php if($categorySearchId == $categoryId) {
+                        echo ' selected="selected" ';}?>
+                        data-categoryurl="<?php echo get_option('siteurl').'/'.$catalogPage.'?category='.$categorySearchId?>" >
+                    <?php echo preg_replace('/^\s*(\S)/eu',"mb_strtoupper('\\1', 'UTF-8')", array_search($categorySearchId, $categories) );?>
+                </option>
             <?php
                 }
             ?>
-            </select>
+            </select> -->
             </div>
             <div id="patternHolder" style="width: 430px; height: 90px; margin: 0 auto;" data-colorcount="<?php echo (count($colors) > 7)? 7 : count($colors); ?>">
             <ul id="colorsMatch">
@@ -718,17 +946,23 @@ function doorCatalog($catalogPage, $catalogFlag = false, $newMarkerPlace) {
         </ul>
     <!--</div>-->
 
-    <?php // Condition for Art series
-    if($categoryId == 6) {
-        $artPictures = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'doors'.DIRECTORY_SEPARATOR.'original'.DIRECTORY_SEPARATOR.'art'.DIRECTORY_SEPARATOR.'*.{jpg,png,gif}', GLOB_BRACE);
+    <?php // Condition for Art series POSSIBLE pictures in art directory "images/doors/original/art/"
+    if(($categoryId == 6) || ($categoryId == 7) ) {
+        $pictureDir = 'art';
+        if($categoryId == 7) {
+            $pictureDir = 'glass';
+        }
+        $artPictures = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'doors'.DIRECTORY_SEPARATOR.'original'.DIRECTORY_SEPARATOR. $pictureDir .DIRECTORY_SEPARATOR.'*.{jpg,png,gif}', GLOB_BRACE);
         if(!empty($artPictures)) {
             ?><div>
             <ul style="display: none;" class="artSamples" data-pluginurl="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__));?>" data-picturecount="<?php echo count($artPictures); ?>">
                 <?php foreach($artPictures as $picture) {
-                        $model = explode('-', basename($picture));
+                        $fileExt = pathinfo($picture, PATHINFO_EXTENSION);
+                        $fileName = basename($picture, ".".$fileExt);
+                        $model = explode('-', $fileName);
                     ?>
                     <li class="artSample">
-                        <img class="pictureArt" data-categoryid="<?php echo $categoryId?>" data-modelprefix="<?php echo ucfirst($prefix[$categoryId]);?>" data-modelname="<?php echo $model[1];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__));?>/images/doors/original/art/<?php echo basename($picture);?>" width="60px" height="110px" alt="" />
+                        <img class="pictureArt" data-categoryid="<?php echo $categoryId?>" data-modelprefix="<?php echo ucfirst($prefix[$categoryId]);?>" data-modelname="<?php echo $model[1];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__));?>/images/doors/original/<?php echo $pictureDir;?>/<?php echo basename($picture);?>" width="60px" height="110px" alt="" />
                     </li>
                 <?php } ?>
             </ul>
@@ -750,7 +984,7 @@ function buildCatalogCategorySet($items, $color, $newMarkerPlace) {
     $categories = $config['category'];
     $pattern = $config['pattern'];
     $prefix = $config['prefix'];
-    foreach ($items as $model) { ?>
+    foreach ($items as $i => $model) { ?>
              <li>
                  <div class="modelTitle">
                     <p>
@@ -762,23 +996,55 @@ function buildCatalogCategorySet($items, $color, $newMarkerPlace) {
                      <?php } ?>
                      </p>
                  </div>
-                 <div class="itemImage boxgrid captionfull"> <!--  data-modelname="<?php echo $model['name'];?>" style="background-image: url(<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/'.$model['image'] ?>);" -->
-                     <img class="modelPicture" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/small/'.$model['image'] ?>" height="250px" width="125px" alt="" />
+                 <div class="itemImage boxgrid captionfull" <?php echo ($model['category_id'] === '6') ? 'style="position:relative;"' : '';?> > <!--  data-modelname="<?php echo $model['name'];?>" style="background-image: url(<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/'.$model['image'] ?>);" -->
+                     <?php if(($model['category_id'] !== '6') && ($model['category_id'] !== '7')) { ?>
+                        <img class="modelPicture" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/small/'.$model['image'] ?>" height="250px" width="125px" alt="" />
+                     <?php }else {
+                         $doorPatternType = '';
+                         $imageTop = 'top: 29px;';
+                         $imageLeft = 'left: 20px;';
+                         $imageWidth = 'width: 85px;';
+                         $imageHeight = 'height: 212px;';
+                         ?>
+                         <?php if( ($i % 2 == 0) && $model['category_id'] === '6') {
+                             $doorPatternType = 'border/';
+                             $imageTop = 'top: 41px;';
+                             $imageLeft = 'left: 32px;';
+                             $imageWidth = 'width: 62px;';
+                             $imageHeight = 'height: 183px;';
+                         }
+                         /* !!! IMPORTANT patterns are the same for category #6 and #7 !!! */
+                         $patterCatetory = '6';
+                         $handleFileName = 'handle';
+                         $handleLeftPosition = 'left: 25px;';
+                         if($model['category_id'] === '7') {
+                             $handleFileName = 'handleG';
+                             $handleLeftPosition = 'left: 21px;';
+                         }
+                         ?>
+                        <img class="modelPicture modelPictureBox" style="position: absolute; top: 0px; left: 0px; z-index: 20;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/patterns/art/'.$doorPatternType.$patterCatetory.'-'.$color.'.png'; ?>" height="250px" width="125px" alt="" />
+                        <img class="modelPictureImage" style="position: absolute; <?php echo $imageHeight.' '.$imageWidth.' '.$imageTop.' '.$imageLeft;?> z-index: 10;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/original/'.$model['image'] ?>" alt="" />
+                        <img class="modelPictureHandle" style="position: absolute; top: 132px; <?php echo $handleLeftPosition;?> width: 16px; height: 6px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/'.$handleFileName.'.png'; ?>" alt="" />
+                         <?php if($model['category_id'] === '7') { ?>
+                             <img class="modelPictureHinge" style="position: absolute; top: 52px; left: 96px; width: 14px; height: 10px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/hinge.png'; ?>" alt="" />
+                             <img class="modelPictureHinge" style="position: absolute; top: 198px; left: 96px; width: 14px; height: 10px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/hinge.png'; ?>" alt="" />
+                         <?php } ?>
+                     <?php }?>
                      <?php if((integer)$model['new'] === 1 && ($newMarkerPlace == NEW_MARKER_IMG || $newMarkerPlace == NEW_MARKER_ALL)) { ?>
                          <span class="newModelMarker"><?php echo $config['phrases']['new']; ?></span>
                      <?php } ?>
-                     <div class="coverZoom boxcaptionZoom">
+                     <div class="coverZoom boxcaptionZoom" style="z-index: 50;">
                          <span class="zoomModel">
                              Увеличить
                          </span>
                      </div>
-                     <div class="cover boxcaption">
+                     <div class="cover boxcaption" style="z-index: 50;">
                          <span class="roomModel">
                              Комната
                          </span>
                      </div>
                  </div>
-                 <div class="likedModel" data-likecategory="<?php echo $model['category_id'];?>" data-likemodel="<?php echo $model['name'];?>" data-likekey="<?php echo $model['category_id'].$model['name'].$color;?>"><?php echo $config['phrases']['like']; //iconv("cp1251", "UTF-8",)?></div>
+                 <div class="likedModel" <?php if($model['category_id'] === '6' && ($i % 2 == 0)) {echo 'data-artb="1"';}?> data-likecategory="<?php echo $model['category_id'];?>" data-likemodel="<?php echo $model['name'];?>" data-likekey="<?php echo $model['category_id'].$model['name'].$color;?>"><?php echo $config['phrases']['like']; //iconv("cp1251", "UTF-8",)?></div>
              </li>
      <?php } ?>
         <input type="hidden" name="newMarkerPlace" value="<?php echo $newMarkerPlace; ?>">
@@ -790,7 +1056,14 @@ add_action('wp_ajax_nopriv_queryModels', 'queryModels');
 
 function queryModels() {
     $condition = 'category_id = ' . $_GET['category'] . ' AND color = ' . $_GET['color'];
-    $models = selectCatalogItems(SELECT_MODE_CONDITION, array(), $condition, true);
+    if(($_GET['category'] !== '6') && ($_GET['category'] !== '7')) {
+        $models = selectCatalogItems(SELECT_MODE_CONDITION, array(), $condition, true);
+    }
+    else {
+        $folderCategory = getFolderModels($_GET['category']);
+        $models = $folderCategory['models'];
+    }
+
     ob_clean();
     echo buildCatalogCategorySet($models, $_GET['color'], $_GET['newMarkerPlace']);
     die();
@@ -799,6 +1072,40 @@ function queryModels() {
 
 add_action('wp_ajax_queryColor', 'queryColor');
 add_action('wp_ajax_nopriv_queryColor', 'queryColor');
+
+/**
+ * @ var modelType = categoryNumber 6 / 7
+*/
+function getFolderModels($modelType = null) {
+    $colorNum = null;
+    $colorsDir = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'patterns'.DIRECTORY_SEPARATOR.'art'.DIRECTORY_SEPARATOR.'*.{jpg,png,gif}', GLOB_BRACE);
+    foreach($colorsDir as $color) {
+        $info = pathinfo($color);
+        $colorParts = explode('-', $info['filename']);
+        $colors[]['color'] = $colorParts['1'];
+    }
+    if(isset($_GET['color'])) {
+        $colorNum = $_GET['color'];
+    }
+    else {
+        $colorNum = $colors[array_rand($colors)]['color'];
+    }
+    $folderName = 'art';
+    if($modelType === '7') {$folderName = 'glass';}
+    $modelsDir = glob(__DIR__.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'doors'.DIRECTORY_SEPARATOR.'original'.DIRECTORY_SEPARATOR . $folderName .DIRECTORY_SEPARATOR.'*.{jpg,png,gif}', GLOB_BRACE);
+    $searchCondition = '`category_id` = 6 AND `new` = 1';
+    if($modelType === '7') {$searchCondition = '`category_id` = 7 AND `new` = 1';}
+    $dataBaseModels =  selectCatalogItems(SELECT_NEW_MARKER_FOLDER_ORIENTED, array(), $searchCondition, true);
+    foreach($modelsDir as $k => $model) {
+        $info = pathinfo($model);
+        $modelParts = explode('-', $info['filename']);
+        $selectedItems[$k] = array('category_id' => $modelParts['0'], 'image' => $folderName.'/'.$info['basename'], 'name' => $modelParts['1']);
+        if(!empty($dataBaseModels) && in_array($modelParts['1'], $dataBaseModels)) {
+            $selectedItems[$k]['new'] = 1;
+        }
+    }
+    return array('models' => $selectedItems, 'color' => $colorNum, 'modelQty' => count($selectedItems));
+}
 
 function queryColor() {
     $condition = 'category_id = "'.$_GET['categoryId'].'" AND name = "' . $_GET['modelName'] . '" AND color = ' . $_GET['color'];
