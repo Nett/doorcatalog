@@ -23,7 +23,6 @@
   License: GPL2
  */
 ?>
-
 <?php
 define("DONOTCACHEPAGE", "doorcatalog");
 const SELECT_MODE_ALL = 'all';
@@ -67,9 +66,9 @@ function createCatalogDbTable() {
      * 
      */
 }
-
-add_action('admin_head', 'adminHeaders');
-
+if($_GET['page'] === 'catalog_manager') {
+    add_action('admin_head', 'adminHeaders');
+}
 function adminHeaders() {
     $siteurl = get_option('siteurl');
     $cssUrl = $siteurl . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/system/css/admin.css';
@@ -203,7 +202,6 @@ function catalogManager() {
 }
 }
 ?>
-
 <?php
     function buildCatalogList($prefix) {
         $models = selectCatalogItems(SELECT_MODE_ALL ,array('category_id', 'name'));
@@ -239,7 +237,6 @@ function returnCatalogList() {
 }
     
     ?>
-
 <?php
 add_action('wp_ajax_addCatalogItem', 'addCatalogItem');
 
@@ -355,7 +352,6 @@ function automatedModelProcess() {
                 //mysql_query("INSERT INTO " . $table_name ." (category_id, name, image, color, description) VALUES(".(integer)$modelData[0].", ".$modelData[1].", '".$image."', ".(integer)$modelData[2].", '')");
             }
         }
-        mysql_close();
         echo json_encode(array('response' => 'Модели созданы.'));
         die();
     }
@@ -975,7 +971,6 @@ function doorCatalog($catalogPage, $catalogFlag = false, $newMarkerPlace) {
 <?php
     }
 ?>
-                
 <?php 
 
 function buildCatalogCategorySet($items, $color, $newMarkerPlace) {
@@ -1014,7 +1009,7 @@ function buildCatalogCategorySet($items, $color, $newMarkerPlace) {
                              $imageHeight = 'height: 183px;';
                          }
                          /* !!! IMPORTANT patterns are the same for category #6 and #7 !!! */
-                         $patterCatetory = '6';
+                         $patterCategory = '6';
                          $handleFileName = 'handle';
                          $handleLeftPosition = 'left: 25px;';
                          if($model['category_id'] === '7') {
@@ -1022,7 +1017,7 @@ function buildCatalogCategorySet($items, $color, $newMarkerPlace) {
                              $handleLeftPosition = 'left: 21px;';
                          }
                          ?>
-                        <img class="modelPicture modelPictureBox" style="position: absolute; top: 0px; left: 0px; z-index: 20;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/patterns/art/'.$doorPatternType.$patterCatetory.'-'.$color.'.png'; ?>" height="250px" width="125px" alt="" />
+                        <img class="modelPicture modelPictureBox" style="position: absolute; top: 0px; left: 0px; z-index: 20;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/patterns/art/'.$doorPatternType.$patterCategory.'-'.$color.'.png'; ?>" height="250px" width="125px" alt="" />
                         <img class="modelPictureImage" style="position: absolute; <?php echo $imageHeight.' '.$imageWidth.' '.$imageTop.' '.$imageLeft;?> z-index: 10;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/doors/original/'.$model['image'] ?>" alt="" />
                         <img class="modelPictureHandle" style="position: absolute; top: 132px; <?php echo $handleLeftPosition;?> width: 16px; height: 6px; z-index: 21;" data-categoryid="<?php echo $model['category_id']?>" data-modelprefix="<?php echo $prefix[$model['category_id']];?>" data-modelname="<?php echo $model['name'];?>" src="<?php echo get_option('siteurl') . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/images/sample/door/'.$handleFileName.'.png'; ?>" alt="" />
                          <?php if($model['category_id'] === '7') { ?>
@@ -1121,7 +1116,6 @@ function queryColor() {
 // this hook is fired if the current viewer is not logged in
 
 ?>
-
 <?php
 function appendJsCssDoorCatalog() {
     wp_deregister_script( 'jquery' );

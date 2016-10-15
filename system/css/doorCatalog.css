@@ -8,13 +8,13 @@ ul#catalogItemList, ul#catalogItemListMenu {
 }
 
 ul#catalogItemList.noFixedWidth, ul#catalogItemListMenu.noFixedWidth { /*NEED CORRECTION  - MESS INSIDE*/
-    width: 445px;
+    width: 1160px;
     overflow: hidden;
 }
 
 ul#catalogItemList li, ul#catalogItemListMenu li {
 	float:left;
-    margin: 5px 10px;
+    margin: 25px 80px;
 }
 
 ul#catalogItemList li p, ul#catalogItemListMenu li p {

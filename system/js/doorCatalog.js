@@ -3,6 +3,11 @@ var patterns = null;
 var likedModels = new Object();
 (function($) {
 $(function() {
+
+	if(!$.curCSS) {
+		$.curCSS = $.css;
+	}
+
     getSettedUpCookie('favoriteDoors');
     getSettedUpCookie('chosenWall');
     getSettedUpCookie('chosenFloor');
