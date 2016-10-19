@@ -1,31 +1,39 @@
 ul#catalogItemList, ul#catalogItemListMenu {
     display: block;
     list-style: none;
-    width: 745px;
+    width: 830px;
     margin: 15px auto 0;
     min-height: 200px;
     overflow: hidden;
 }
 
 ul#catalogItemList.noFixedWidth, ul#catalogItemListMenu.noFixedWidth { /*NEED CORRECTION  - MESS INSIDE*/
-    width: 1160px;
+    width: 600px;
     overflow: hidden;
 }
 
-ul#catalogItemList li, ul#catalogItemListMenu li {
+ul#catalogItemList li{
 	float:left;
-    margin: 25px 80px;
+    margin: 15px 10px;
+}
+
+ul#catalogItemListMenu li {
+    float:left;
+    margin: 15px 10px;
 }
 
 ul#catalogItemList li p, ul#catalogItemListMenu li p {
     /*border-left: 2px solid #444444;*/
+    line-height: 1;
     text-align: left;
-    font-size: 18px;
+    font-size: 14px;
     padding-left: 5px;
+    padding-top: 3px;
     margin: 4px 0;
 }
 
 ul#catalogItemList li span, ul#catalogItemListMenu li span {
+    line-height: 2;
     display: block;
     text-align: left;
     color: #DE5328;
@@ -297,10 +305,16 @@ ul#catalogItemList span.newModelMarker {
     -moz-transition:All 1s ease-in;
     -o-transition:All 1s ease-in;*/
     transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
-    -webkit-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
-    -moz-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-5px, 0px); /*-13px, -4px*/
+    -webkit-transform: rotate(39deg) scale(0.5) skew(-5deg) translate(-42px, 0px);
+    -moz-transform: rotate(39deg) scale(0.5) skew(-5deg) translate(-42px, 0px); /*-13px, -4px*/
     -o-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
-    -ms-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
+    -ms-transform: rotate(39deg) scale(0.5) skew(-5deg) translate(-42px, 0px);
+    /*
+        -webkit-transform: rotate(39deg) scale(0.5) skew(-5deg) translate(-22px, -25px);
+    -moz-transform: rotate(39deg) scale(0.5) skew(-5deg) translate(-22px, -20px);
+    -o-transform: rotate(39deg) scale(0.5) skew(20deg) translate(-8px, 0px);
+    -ms-transform: rotate(39deg) scale(0.5) skew(-5deg) translate(-26px, -22px);
+    */
     border: solid 1px #2d2d2d;
     text-align: center;
     background: #E4E4E4;
@@ -308,13 +322,22 @@ ul#catalogItemList span.newModelMarker {
     font-weight: bold;
     font-size: 22px;
     color: #DE5328;
-    width: 90px;
+    width: 115px;
     top: 0px;
     left: 0px;
     z-index: 30;
     /*-moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;*/
+}
+
+#room-holder #roomImgHolder img{
+    max-width: none;
+}
+
+.ui-dialog {
+    font-size: 12px;
+    line-height: 2;
 }
 
 /*.newModelMarker:hover{

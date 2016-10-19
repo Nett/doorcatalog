@@ -905,7 +905,7 @@ function doorCatalog($catalogPage, $catalogFlag = false, $newMarkerPlace) {
             ?>
             </select> -->
             </div>
-            <div id="patternHolder" style="width: 430px; height: 90px; margin: 0 auto;" data-colorcount="<?php echo (count($colors) > 7)? 7 : count($colors); ?>">
+            <div id="patternHolder" style="width: 410px; height: 90px; margin: 0 auto;" data-colorcount="<?php echo (count($colors) > 7)? 7 : count($colors); ?>">
             <ul id="colorsMatch">
                 <?php
                 $colorIndexCnt = 0;

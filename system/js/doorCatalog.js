@@ -150,7 +150,7 @@ $(function() {
                         var slideMove = $('div#patternHolder').data('colorcount');
                         if((categoryId == 6 && $('.artSamples').length && isPictureInArtMode) || (categoryId == 7 && $('.artSamples').length && isPictureInArtMode) ) {
                             slideQty = 4; slideMove = 4;
-                            $('div#catalogDialogBox #zoomSamplesHolder #patternHolder').css({height: '110px', float: 'left', overflow: 'hidden', 'width': '300px', 'display': 'inline-block', 'padding-left': '55px'});
+                            $('div#catalogDialogBox #zoomSamplesHolder #patternHolder').css({height: '125px', float: 'left', overflow: 'hidden', 'width': '300px', 'display': 'inline-block', 'padding-left': '55px'});
                             $('div#catalogDialogBox #zoomSamplesHolder #patternHolder').prepend($('<div>').addClass('currentPatternName'));
                             $('div#catalogDialogBox #zoomSamplesHolder #patternHolder div.currentPatternName').append($('<span>').text('Текущий цвет: '));
                             $('div#catalogDialogBox #zoomSamplesHolder #patternHolder div.currentPatternName').append($('<span>').addClass('currentPattern'));
@@ -224,7 +224,7 @@ $(function() {
                         }
                         $('div#catalogDialogBox div#imgHold').append($('<img>').attr({'src': $('div#catalogDialogBox .artSamples').data('pluginurl') + '/images/sample/door/'+handleImage+'.png' + '?' + Math.random(), 'width': '32px', 'height': '12px', 'alt': ''}).css({'position': 'absolute', 'top': '321px', 'left': handleImageLeft, 'z-index': '10'}));
                         if(!sourcePattern.test(imgSrc.toString())) {
-                            $('div#catalogDialogBox div#imgHold').append($('<img>').attr({'src': modelPicture + '?' + Math.random(), 'alt': ''}).addClass('currentViewArtImg').css({'position': 'absolute', 'top': '96px', 'left': '44px', 'width': '187px', 'height': '465px', 'z-index': '-1'}));
+                            $('div#catalogDialogBox div#imgHold').append($('<img>').attr({'src': modelPicture + '?' + Math.random(), 'alt': ''}).addClass('currentViewArtImg').css({'position': 'absolute', 'top': '102px', 'left': '44px', 'width': '187px', 'height': '465px', 'z-index': '-1'}));
                         }
                         else {
                             $('div#catalogDialogBox div#imgHold').append($('<img>').attr({'src': modelPicture + '?' + Math.random(), 'alt': ''}).addClass('currentViewArtImg').css({'position': 'absolute', 'top': '122px', 'left': '70px', 'width': '135px', 'height': '401px', 'z-index': '-1'}));
@@ -332,7 +332,7 @@ $(function() {
                         });
                         $('div#room-window div#colorPatterns').empty();
                         $('div#room-window div#colorPatterns').prepend(dialogPatterns);
-                        $('div#room-window #patternHolder').css({width: '435px', height: '110px'});
+                        $('div#room-window #patternHolder').css({width: '435px', height: '125px'});
                         $('div#room-window #patternHolder ul#colorsMatch').attr('id', 'dialogPattern');
                         var dialogIndexColor = null;
                         if( $('#colorsMatch li:not(.pager):has(img.activePattern)').length ) {
